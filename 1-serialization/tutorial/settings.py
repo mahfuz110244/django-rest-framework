@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'tutorial.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'serialization',
+        'NAME': 'authentication',
         'USER': 'bs086',
         'PASSWORD': 'bs23',
         'HOST': 'localhost',
