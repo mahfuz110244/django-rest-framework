@@ -27,6 +27,7 @@ from django.conf.urls import url, include
 from snippets import views
 from rest_framework.routers import DefaultRouter
 from rest_framework.schemas import get_schema_view
+from rest_framework.documentation import include_docs_urls
 
 schema_view = get_schema_view(title='Pastebin API')
 
@@ -40,5 +41,6 @@ router.register(r'users', views.UserViewSet)
 urlpatterns = [
     url(r'^schema/$', schema_view),
     url(r'^', include(router.urls)),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^docs/', include_docs_urls(title='My API title'))
 ]

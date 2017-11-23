@@ -198,6 +198,11 @@ from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework import permissions
 from snippets.permissions import IsOwnerOrReadOnly
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 #
 # from rest_framework.decorators import api_view
 # from rest_framework.response import Response
@@ -246,12 +251,13 @@ from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    # permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
 
 class SnippetViewSet(viewsets.ModelViewSet):
     """
@@ -270,4 +276,21 @@ class SnippetViewSet(viewsets.ModelViewSet):
         return Response(snippet.highlighted)
 
     def perform_create(self, serializer):
+        print (serializer._kwargs['data'])
+        print (serializer._validated_data)
         serializer.save(owner=self.request.user)
+
+
+
+
+class RestrictedView(APIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get(self, request):
+        data = {
+            'id': request.user.id,
+            'username': request.user.username,
+            'token': str(request.auth)
+        }
+        return Response(data)

@@ -51,6 +51,7 @@ from snippets import views
 from snippets.views import SnippetViewSet, UserViewSet, api_root
 from rest_framework import renderers
 
+
 snippet_list = SnippetViewSet.as_view({
     'get': 'list',
     'post': 'create'

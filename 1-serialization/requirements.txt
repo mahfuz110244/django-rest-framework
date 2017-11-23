@@ -1,0 +1,7 @@
+Django==1.11.7
+djangorestframework
+coreapi==2.3.0
+pygments==2.2.0
+psycopg2
+djangorestframework-jwt
+markdown
