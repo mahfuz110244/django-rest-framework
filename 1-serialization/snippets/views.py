@@ -278,7 +278,7 @@ class SnippetViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         print (serializer._kwargs['data'])
         print (serializer._validated_data)
-        serializer.save(owner=self.request.user)
+
 
 
 
