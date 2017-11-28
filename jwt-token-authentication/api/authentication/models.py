@@ -55,7 +55,7 @@ class UserManager(BaseUserManager):
       return user
 
 
-class User(AbstractUser, PermissionsMixin, TimestampedModel):
+class User(AbstractUser, TimestampedModel):
     # # Each `User` needs a human-readable unique identifier that we can use to
     # # represent the `User` in the UI. We want to index this column in the
     # # database to improve lookup performance.
