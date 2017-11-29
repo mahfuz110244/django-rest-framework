@@ -102,8 +102,8 @@ class ContactsUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('id', 'username', 'email', 'password')
 
-        # def create(self, validated_data):
-        #     return User(**validated_data)
+        def create(self, validated_data):
+            return User(**validated_data)
 
 # class UserSerializer(serializers.ModelSerializer):
 #     """Handles serialization and deserialization of User objects."""

@@ -66,8 +66,8 @@ class LoginAPIView(APIView):
 
 class CustomUserAPIView(APIView):
     # Allow any user (authenticated or not) to hit this endpoint.
-    # permission_classes = (AllowAny,)
-    # renderer_classes = (UserJSONRenderer,)
+    permission_classes = (AllowAny,)
+    renderer_classes = (UserJSONRenderer,)
     # serializer_class = RegistrationSerializer
 
     def post(self, request, format=None):
@@ -76,7 +76,7 @@ class CustomUserAPIView(APIView):
         # your own work later on. Get familiar with it.
         serializer = ContactsUserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.create(serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
