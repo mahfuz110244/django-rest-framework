@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 # from api.profiles.serializers import ProfileSerializer
 
-from api.authentication.models import User
+from api.authentication.models import User, CustomUser
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -35,8 +35,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=255)
-    username = serializers.CharField(max_length=255, read_only=True)
+    email = serializers.CharField(max_length=255, read_only=True)
+    username = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
 
@@ -96,6 +96,14 @@ class LoginSerializer(serializers.Serializer):
             'token': user.token
         }
 
+class ContactsUserSerializer(serializers.ModelSerializer):
+    # token = serializers.CharField(max_length=255, read_only=True)
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'username', 'email', 'password')
+
+        # def create(self, validated_data):
+        #     return User(**validated_data)
 
 # class UserSerializer(serializers.ModelSerializer):
 #     """Handles serialization and deserialization of User objects."""

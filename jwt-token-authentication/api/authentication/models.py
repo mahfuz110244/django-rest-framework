@@ -141,3 +141,8 @@ class User(AbstractUser, TimestampedModel):
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token.decode('utf-8')
+
+class CustomUser(models.Model):
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=50, unique=True)
+    password = models.CharField(max_length=50)
