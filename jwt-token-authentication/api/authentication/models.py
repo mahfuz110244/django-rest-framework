@@ -8,6 +8,7 @@ from django.contrib.auth.models import (
 )
 from api.core.models import TimestampedModel
 from django.db import models
+from django.utils import timezone
 
 
 
@@ -23,21 +24,41 @@ class UserManager(BaseUserManager):
     to create `User` objects.
     """
 
-    def create_user(self, username, email, password=None):
+    def create_user(self, username, email, password, contact_id=None,
+                    security_question=None, security_answer=None,
+                    status=None, terms_and_condition_accepted=None,
+                    created_uid=None, updated_uid=None):
         """Create and return a `User` with an email, username and password."""
-        if username is None:
-            raise TypeError('Users must have a username.')
+        # username = data['username']
+        # email = data['email']
+        # password = data['password']
+        # contact_id = data['contact_id']
+        # security_question = data.get('security_question','')
+        # security_answer = data.get('security_answer','')
+        # status = data['status']
+        # terms_and_condition_accepted = data['terms_and_condition_accepted']
+        # created_uid = data['created_uid']
+        # updated_uid = data['updated_uid']
 
-        if email is None:
-            raise TypeError('Users must have an email address.')
-
-        user = self.model(username=username, email=self.normalize_email(email))
+        user = self.model(username=username,
+                          email=self.normalize_email(email),
+                          contact_id = contact_id,
+                          security_question = (security_question,''),
+                          security_answer = (security_answer,''),
+                          status = status,
+                          terms_and_condition_accepted = terms_and_condition_accepted,
+                          created_uid=created_uid,
+                          updated_uid=updated_uid
+                          )
         user.set_password(password)
         user.save()
 
         return user
 
-    def create_superuser(self, username, email, password):
+    def create_superuser(self, username, email, password, contact_id=None,
+                    security_question=None, security_answer=None,
+                    status=None, terms_and_condition_accepted=None,
+                    created_uid=None, updated_uid=None):
       """
       Create and return a `User` with superuser powers.
 
@@ -47,12 +68,60 @@ class UserManager(BaseUserManager):
       if password is None:
           raise TypeError('Superusers must have a password.')
 
-      user = self.create_user(username, email, password)
+      user = self.create_user(username, email, password,status=True,terms_and_condition_accepted=True)
       user.is_superuser = True
       user.is_staff = True
+      user.status = True
+      user.terms_and_condition_accepted = True
       user.save()
 
       return user
+
+
+# Create your models here.
+class Contacts(models.Model):
+    first_name = models.CharField(max_length=50, blank=True)
+    last_name = models.CharField(max_length=50, blank=True)
+    date_of_birth = models.CharField(max_length=10,blank=True)
+    estimated_age = models.CharField(max_length=50, blank=True)
+    gender = models.CharField(max_length=50, blank=True)
+    status = models.BooleanField(default=False, blank=True)
+    revera_id = models.CharField(max_length=50, blank=True)
+    nationality = models.CharField(max_length=50,blank=True)
+    national_id = models.CharField(max_length=50,blank=True)
+    medical_insurance_id = models.CharField(max_length=50,blank=True)
+    ethnicity = models.CharField(max_length=50,blank=True)
+    religion = models.CharField(max_length=20,blank=True)
+    merital_status = models.CharField(max_length=20,blank=True)
+    blood_group = models.CharField(max_length=20,blank=True)
+    email = models.EmailField(max_length=50, blank=True, unique=True)
+    username = models.CharField(max_length=50, blank=True, unique=True)
+    phone = models.CharField(max_length=50,blank=True)
+    height = models.CharField(max_length=20, blank=True)
+    weight = models.CharField(max_length=20, blank=True)
+    alergies = models.TextField(max_length=500, blank=True)
+    profile_photo = models.ImageField(upload_to='images', max_length=254, blank=True)
+
+    created_date = models.DateTimeField(default=timezone.now)
+    created_uid = models.ForeignKey('User', related_name='user1', blank=True, null=True)
+    updated_date = models.DateTimeField(default=timezone.now)
+    updated_uid = models.ForeignKey('User', related_name='user2', blank=True, null=True)
+
+    class Meta:
+        ordering = ["-id"]
+
+    def __str__(self):  # __unicode__ on Python 2
+        return self.first_name + " " + self.last_name
+
+class ContactsAttributes(models.Model):
+    contact_id = models.ForeignKey(Contacts, on_delete=models.CASCADE, blank=True, null=True)
+    attribute_key = models.CharField(max_length=50, blank=True)
+    attribute_value = models.TextField(max_length=500, blank=True)
+
+    created_date = models.DateTimeField(default=timezone.now)
+    created_uid = models.ForeignKey('User', related_name='user3', blank=True, null=True)
+    updated_date = models.DateTimeField(default=timezone.now)
+    updated_uid = models.ForeignKey('User', related_name='user4', blank=True, null=True)
 
 
 class User(AbstractUser, TimestampedModel):
@@ -66,6 +135,11 @@ class User(AbstractUser, TimestampedModel):
     # the user anyways, we will also use the email for logging in because it is
     # the most common form of login credential at the time of writing.
     email = models.EmailField(db_index=True, unique=True)
+    contact_id = models.ForeignKey(Contacts, on_delete=models.CASCADE, blank=True, null=True)
+    security_question = models.TextField(max_length=500, blank=True, default="")
+    security_answer = models.TextField(max_length=500, blank=True,default="")
+    status = models.BooleanField(default=False, blank=True)
+    terms_and_condition_accepted = models.BooleanField(default=False, blank=True)
 
     # When a user no longer wishes to use our platform, they may try to delete
     # there account. That's a problem for us because the data we collect is
@@ -99,7 +173,7 @@ class User(AbstractUser, TimestampedModel):
 
         This string is used when a `User` is printed in the console.
         """
-        return self.email
+        return self.username
 
     @property
     def token(self):
@@ -133,10 +207,11 @@ class User(AbstractUser, TimestampedModel):
         Generates a JSON Web Token that stores this user's ID and has an expiry
         date set to 60 days into the future.
         """
-        dt = datetime.now() + timedelta(days=60)
+        dt = datetime.now() + timedelta(hours=1)
 
         token = jwt.encode({
-            'id': self.pk,
+            'username': self.username,
+            'password': self.password,
             'exp': int(dt.strftime('%s'))
         }, settings.SECRET_KEY, algorithm='HS256')
 
@@ -146,3 +221,5 @@ class CustomUser(models.Model):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=50)
+
+

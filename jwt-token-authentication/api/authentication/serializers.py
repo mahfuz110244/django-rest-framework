@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 # from api.profiles.serializers import ProfileSerializer
 
-from api.authentication.models import User, CustomUser
+from api.authentication.models import User, Contacts, ContactsAttributes
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -26,7 +26,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = User
         # List all of the fields that could possibly be included in a request
         # or response, including fields specified explicitly above.
-        fields = ['email', 'username', 'password', 'token']
+        fields = ('id', 'username', 'email', 'password', 'first_name', 'last_name',
+                  'contact_id', 'security_question', 'security_answer', 'status',
+                  'terms_and_condition_accepted','token',
+                  'created_date', 'created_uid', 'updated_date', 'updated_uid')
         # fields = ['email', 'username', 'password']
 
     def create(self, validated_data):
@@ -35,7 +38,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=255, read_only=True)
+    # email = serializers.CharField(max_length=255, read_only=True)
     username = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(max_length=255, read_only=True)
@@ -49,19 +52,19 @@ class LoginSerializer(serializers.Serializer):
         username = data.get('username', None)
         password = data.get('password', None)
 
-        # As mentioned above, an email is required. Raise an exception if an
-        # email is not provided.
-        if username is None:
-            raise serializers.ValidationError(
-                'An Username is required to log in.'
-            )
-
-        # As mentioned above, a password is required. Raise an exception if a
-        # password is not provided.
-        if password is None:
-            raise serializers.ValidationError(
-                'A password is required to log in.'
-            )
+        # # As mentioned above, an email is required. Raise an exception if an
+        # # email is not provided.
+        # if username is None:
+        #     raise serializers.ValidationError(
+        #         'An Username is required to log in.'
+        #     )
+        #
+        # # As mentioned above, a password is required. Raise an exception if a
+        # # password is not provided.
+        # if password is None:
+        #     raise serializers.ValidationError(
+        #         'A password is required to log in.'
+        #     )
 
         # The `authenticate` method is provided by Django and handles checking
         # for a user that matches this email/password combination. Notice how
@@ -91,19 +94,35 @@ class LoginSerializer(serializers.Serializer):
         # This is the data that is passed to the `create` and `update` methods
         # that we will see later on.
         return {
-            'email': user.email,
             'username': user.username,
             'token': user.token
         }
 
-class ContactsUserSerializer(serializers.ModelSerializer):
-    # token = serializers.CharField(max_length=255, read_only=True)
+class ContactsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomUser
-        fields = ('id', 'username', 'email', 'password')
+        model = Contacts
+        fields = ('id','first_name', 'last_name', 'date_of_birth', 'estimated_age', 'gender',
+                  'status', 'revera_id', 'nationality', 'national_id',
+                  'medical_insurance_id','ethnicity', 'religion', 'merital_status', 'blood_group',
+                  'email', 'username','phone', 'height', 'weight', 'alergies', 'profile_photo',
+                  'created_date','created_uid','updated_date','updated_uid')
 
-        def create(self, validated_data):
-            return User(**validated_data)
+class ContactsAttributesSerializer(serializers.ModelSerializer):
+    contact_id = serializers.ReadOnlyField(source='contact_id.id')
+    class Meta:
+        model = ContactsAttributes
+        fields = ('id','contact_id', 'attribute_key', 'attribute_value',
+                  'created_date', 'created_uid', 'updated_date', 'updated_uid')
+
+
+class ContactsUserSerializer(serializers.ModelSerializer):
+    contact_id = serializers.ReadOnlyField(source='contact_id.id')
+    class Meta:
+        model = User
+        fields = ('id','username', 'email', 'password', 'first_name', 'last_name',
+                  'contact_id', 'security_question', 'security_answer', 'status',
+                  'terms_and_condition_accepted',
+                  'created_date', 'created_uid', 'updated_date', 'updated_uid')
 
 # class UserSerializer(serializers.ModelSerializer):
 #     """Handles serialization and deserialization of User objects."""

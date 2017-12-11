@@ -1,0 +1,8 @@
+Django
+djangorestframework
+coreapi
+pygments
+psycopg2
+djangorestframework-jwt
+markdown
+pillow
